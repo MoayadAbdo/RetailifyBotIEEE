@@ -1,0 +1,1240 @@
+{
+  "name": "voice and text input",
+  "nodes": [
+    {
+      "parameters": {
+        "chatId": "5139960044",
+        "text": "give me a second please",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -700,
+        40
+      ],
+      "id": "ebdda72f-bac7-4728-a355-d68588800f61",
+      "name": "Telegram",
+      "webhookId": "530c6496-5213-45c8-ab9c-4cc87c22b64d",
+      "credentials": {
+        "telegramApi": {
+          "id": "l98Xt2GNadjwoHct",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notExists",
+                      "singleValue": true
+                    },
+                    "id": "c1aa9030-ec94-4cf7-b743-04b1110acc8c"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "89af2b27-6e66-4d96-9139-346f6d76e396",
+                    "leftValue": "={{ $('Telegram Trigger').item.json.message.voice.file_id }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -480,
+        40
+      ],
+      "id": "b6f79fea-6440-43d9-86c6-f3127556b093",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "chatId": "={{$node[\"Telegram Trigger\"].json.message.chat.id}}\n",
+        "text": "={{ $json.ai_response }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1120,
+        -400
+      ],
+      "id": "ec772daa-34ed-4827-ad40-a865450c2680",
+      "name": "Telegram1",
+      "webhookId": "36936ea1-2028-4abc-99ec-88129a69eedc",
+      "credentials": {
+        "telegramApi": {
+          "id": "l98Xt2GNadjwoHct",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.assemblyai.com/v2/upload",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "9faad801f8cd49f598d07781f2da5985"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -40,
+        340
+      ],
+      "id": "9798ef6a-09dc-47c7-9f50-cd9ad4ed4900",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.assemblyai.com/v2/transcript",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "9faad801f8cd49f598d07781f2da5985"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "audio_url",
+              "value": "={{ $json.upload_url }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        180,
+        340
+      ],
+      "id": "586b66d7-d842-42a7-a708-e6482b1ea929",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.assemblyai.com/v2/transcript/{{ $json.id }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "9faad801f8cd49f598d07781f2da5985"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        776,
+        340
+      ],
+      "id": "b8f868f4-f5ca-4a19-b7b2-db104207c08b",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "amount": 20
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        478,
+        340
+      ],
+      "id": "21aef948-85f6-4476-a7cf-40f2a9a2d222",
+      "name": "Wait",
+      "webhookId": "66ee7f7c-8fc7-4ade-9ee4-cef1240b2fd0"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/audio/speech",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"tts-1\",\n  \"input\": \"{{ $json.ai_response }}\",\n  \"voice\": \"nova\",\n  \"response_format\": \"mp3\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2480,
+        300
+      ],
+      "id": "72637a04-18da-4528-8f72-2cfbdb4e0cf2",
+      "name": "HTTP Request3"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Telegram Trigger').item.json.message.voice.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -260,
+        340
+      ],
+      "id": "21feb155-8ebb-46cc-9cac-efe68315958b",
+      "name": "Telegram3",
+      "webhookId": "0273229c-6ad2-4f96-b420-e5db20d310f1",
+      "credentials": {
+        "telegramApi": {
+          "id": "l98Xt2GNadjwoHct",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{$node[\"Telegram Trigger\"].json.message.chat.id}}",
+        "binaryData": true,
+        "additionalFields": {
+          "fileName": "data"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2700,
+        300
+      ],
+      "id": "357e275a-b477-4dbe-8ff2-307b5a8d8e8c",
+      "name": "Telegram4",
+      "webhookId": "1b12ccdc-0fa3-4211-b502-78c8eef92318",
+      "credentials": {
+        "telegramApi": {
+          "id": "l98Xt2GNadjwoHct",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -920,
+        40
+      ],
+      "id": "0d0d41f1-b1f4-4f24-b21b-aaf35f08030b",
+      "name": "Telegram Trigger",
+      "webhookId": "bc07f269-f14c-4f51-8a86-ff6fa349c651",
+      "credentials": {
+        "telegramApi": {
+          "id": "l98Xt2GNadjwoHct",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "Transactions",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -140,
+        -380
+      ],
+      "id": "a5757f0b-33fc-49e6-8405-472fdf6f49b5",
+      "name": "Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "seiYyYW1t87nLJi3",
+          "name": "abood"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = items; // all records from Supabase\nconst formattedRows = rows.map(item => {\n  const data = item.json;\n  return `Transaction ID: ${data.transaction_id}, Mall: ${data.mall_name}, Branch: ${data.branch_name}, Date: ${data.transaction_date}, Amount: ${data.transaction_amount}, Tax: ${data.tax_amount}, Type: ${data.transaction_type}, Status: ${data.transaction_status}`;\n});\n\nconst combinedText = formattedRows.join('\\n');\n\nreturn [{\n  json: {\n    context: combinedText\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        -380
+      ],
+      "id": "572c13f7-46df-444f-a2d1-004c13966c6e",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "tableId": "chat_memory",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_message",
+              "fieldValue": "={{$node[\"Telegram Trigger\"].json[\"message\"][\"text\"]}}"
+            },
+            {
+              "fieldId": "ai_response",
+              "fieldValue": "={{ $json.text }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        900,
+        -400
+      ],
+      "id": "ad39c705-1bcd-48f1-9fb9-d5a05432f65d",
+      "name": "Supabase1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XV9TEhJKj32GSOIb",
+          "name": "adnan"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "chat_memory",
+        "limit": 10
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -140,
+        -200
+      ],
+      "id": "07f389c9-fef2-42bb-8541-d57358ade34e",
+      "name": "Supabase2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XV9TEhJKj32GSOIb",
+          "name": "adnan"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: An array of memory rows (from Supabase)\n// Output: A single formatted string combining all past user-AI messages\n\nconst memory = items.map(item => {\n  const user = item.json.user_message || '';\n  const ai = item.json.ai_response || '';\n  return `User: ${user}\\nAI: ${ai}`;\n}).reverse().join('\\n\\n');\n\nreturn [{ json: { memory } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        80,
+        -200
+      ],
+      "id": "ca31a773-546f-4643-8c84-2b99fa0476b8",
+      "name": "Code1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        320,
+        -380
+      ],
+      "id": "d9bc5a71-9735-496d-8c35-d4930d8a56d0",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        540,
+        -200
+      ],
+      "id": "54fad0cc-3514-4a87-8d2b-aad7e36480be",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "AhpNoKLTbm49mSHL",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a smart financial analyst. Today is may 10th, 2025. Answer extremly short answers based on the provided data.\nplease cite the specific transactions that you used in your answer.\nPast conversation:\n{{ $node[\"Code1\"].json[\"memory\"] }}\n\nHere's the full transaction data:\n{{ $node[\"Code\"].json[\"context\"] }}\n\nMy question is:\n{{$node[\"Telegram Trigger\"].json[\"message\"][\"text\"]}}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        520,
+        -380
+      ],
+      "id": "6caf3891-fbf8-4815-9473-d87db12c0c70",
+      "name": "Basic LLM Chain1",
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "Transactions",
+        "returnAll": true
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        220
+      ],
+      "id": "2ea25d32-b253-4fc1-925b-b02e45ae4a01",
+      "name": "Supabase3",
+      "credentials": {
+        "supabaseApi": {
+          "id": "seiYyYW1t87nLJi3",
+          "name": "abood"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = items; // all records from Supabase\nconst formattedRows = rows.map(item => {\n  const data = item.json;\n  return `Transaction ID: ${data.transaction_id}, Mall: ${data.mall_name}, Branch: ${data.branch_name}, Date: ${data.transaction_date}, Amount: ${data.transaction_amount}, Tax: ${data.tax_amount}, Type: ${data.transaction_type}, Status: ${data.transaction_status}`;\n});\n\nconst combinedText = formattedRows.join('\\n');\n\nreturn [{\n  json: {\n    context: combinedText\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1420,
+        220
+      ],
+      "id": "09765249-4dad-4e4b-b10d-71847fcccf8c",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "tableId": "chat_memory",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "user_message",
+              "fieldValue": "={{$node[\"Telegram Trigger\"].json[\"message\"][\"text\"]}}"
+            },
+            {
+              "fieldId": "ai_response",
+              "fieldValue": "={{ $json.text }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2260,
+        300
+      ],
+      "id": "4c2ce0e9-4bf4-426b-b57b-734bfc48399f",
+      "name": "Supabase4",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XV9TEhJKj32GSOIb",
+          "name": "adnan"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "chat_memory",
+        "limit": 10
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        420
+      ],
+      "id": "bfab3750-6ef1-4387-aac1-d7ae4e278bab",
+      "name": "Supabase5",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XV9TEhJKj32GSOIb",
+          "name": "adnan"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: An array of memory rows (from Supabase)\n// Output: A single formatted string combining all past user-AI messages\n\nconst memory = items.map(item => {\n  const user = item.json.user_message || '';\n  const ai = item.json.ai_response || '';\n  return `User: ${user}\\nAI: ${ai}`;\n}).reverse().join('\\n\\n');\n\nreturn [{ json: { memory } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1420,
+        420
+      ],
+      "id": "ec7d7fcb-afad-4732-a915-d2f593f65307",
+      "name": "Code3"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        1640,
+        320
+      ],
+      "id": "b3a8c666-27de-4002-8ac1-a530f6f33d43",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1780,
+        480
+      ],
+      "id": "f83b5ebc-ed93-4b2e-9ec7-9f3125343949",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "AhpNoKLTbm49mSHL",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a smart financial analyst. Today is may 10th, 2025. Answer extremly short answers based on the provided data.\n\nPast conversation:\n{{ $node[\"Code3\"].json[\"memory\"] }}\n\nHere's the full transaction data:\n{{ $node[\"Code2\"].json[\"context\"] }}\n\nMy question is:\n{{$node[\"HTTP Request2\"].json.text}}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        1860,
+        320
+      ],
+      "id": "b8a60548-78b6-4266-9e2f-be40a4753694",
+      "name": "Basic LLM Chain",
+      "retryOnFail": false,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "content": "## Retailify bot \nFull Tutorial To save money and manage time\n"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        -260
+      ],
+      "id": "8223bad5-2c16-4104-92e9-f5e56fba44e7",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Input Handling:\n\nText and voice messages are received via Telegram, triggering the initiation of the entire process.",
+        "height": 260,
+        "width": 700,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1060,
+        -60
+      ],
+      "id": "af15b6e3-4332-4b6c-b5db-7bb8f4fb542c",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Speech to Text:\n\nWe utilized HTTP requests to optimize this operation for both efficiency and cost-effectiveness, leveraging widely accessible tools to ensure ease of use.",
+        "height": 260,
+        "width": 1180
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -280,
+        240
+      ],
+      "id": "ceb5d7a3-1f91-4504-ba51-771c3a22bdd0",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Text to Speech:\nAfter processing the data and handling the query, we convert the response back to audio using the OpenAI API.",
+        "height": 280,
+        "width": 480,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2180,
+        180
+      ],
+      "id": "772d6a7e-c1a6-4d59-9b2d-5332b9354013",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Output  \nWe send the response back through the Telegram platform in the same format in which it was received.",
+        "height": 340,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2680,
+        140
+      ],
+      "id": "585b506a-d12c-4c16-ad12-1f506876901d",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "## Output  \nWe send the response back through the Telegram platform in the same format in which it was received.",
+        "height": 340,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1060,
+        -560
+      ],
+      "id": "6518f4bb-2ed8-4621-ad77-9b69e7f36fd4",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Processing User Queries (RAG):\n\nContext Retrieval: Query the transaction dataset and store records in context.\n\nMemory Retrieval: Fetch the latest entry from the memory database and store it in memory.\n\nQuery Resolution: Construct a prompt using context, memory, and the user's query, then send it to the OpenAI API for a response.\n\nMemory Update: Store the user query and response in the memory database for future continuity.\n\n## For more information, please refer to the documentation in the GitHub repository.",
+        "height": 620,
+        "width": 1280,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -260,
+        -660
+      ],
+      "id": "b0eaeb39-5b1c-4b20-8105-7af87c39cbb9",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "## Processing User Queries (RAG):\n\nContext Retrieval: Query the transaction dataset and store records in context.\n\nMemory Retrieval: Fetch the latest entry from the memory database and store it in memory.\n\nQuery Resolution: Construct a prompt using context, memory, and the user's query, then send it to the OpenAI API for a response.\n\nMemory Update: Store the user query and response in the memory database for future continuity.\n\n## For more information, please refer to the documentation in the GitHub repository.",
+        "height": 660,
+        "width": 1000,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1160,
+        -60
+      ],
+      "id": "a9d6b324-c3e9-4d32-9c4f-8ef77cbbb325",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 3
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -260,
+        -960
+      ],
+      "id": "95162a65-deab-43eb-a7a4-abf7761c836e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        640,
+        -840
+      ],
+      "id": "54dda75d-bae4-43df-a69a-4bd5e08ea04b",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "AhpNoKLTbm49mSHL",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "jordan_transactions",
+        "limit": 1752
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -960
+      ],
+      "id": "65ae4836-93cb-4953-a5fc-e1a81423eab5",
+      "name": "Supabase6",
+      "credentials": {
+        "supabaseApi": {
+          "id": "XV9TEhJKj32GSOIb",
+          "name": "adnan"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a precise financial transaction analyst working with these exact data:{{ $json.context }}\n\n\n\n\nYour role is to generate **structured financial reports** using the exact data provided.\n**Rules:** \n1. NEVER guess – if a query depends on missing fields, reply: \"Not enough data.\" \n2. Use the exact value of each field. Do not assume or estimate.\n3. Use DD/MM/YYYY format for all dates (today is 10/05/2025).\n4. Amounts must be formatted with 2 decimals and a $ sign (e.g., $2.05). \n5. For lists or summaries, show this format:    - `Transaction ID | Amount | Branch` \n6. You may include totals, counts, or summaries only if they can be computed directly from the data.\n7. Respond clearly and concisely.  Do not refer to the user. Focus only on presenting the requested data in a clear financial reporting tone."
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.6,
+      "position": [
+        440,
+        -960
+      ],
+      "id": "04a67a79-0e35-4fe8-a373-76230b9eef2c",
+      "name": "Basic LLM Chain2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const rows = items; // all records from Supabase\nconst formattedRows = rows.map(item => {\n  const data = item.json;\n  return `Transaction ID: ${data.transaction_id}, Mall: ${data.mall_name}, Branch: ${data.branch_name}, Date: ${data.transaction_date}, Amount: ${data.transaction_amount}, Tax: ${data.tax_amount}, Type: ${data.transaction_type}, Status: ${data.transaction_status}`;\n});\n\nconst combinedText = formattedRows.join('\\n');\n\nreturn [{\n  json: {\n    context: combinedText\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        -960
+      ],
+      "id": "0698865b-c72f-4736-b67f-90aa4b45544c",
+      "name": "Code4"
+    },
+    {
+      "parameters": {
+        "chatId": "=5139960044 ",
+        "text": "={{$json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        840,
+        -960
+      ],
+      "id": "2d12b37e-ab0c-48cd-aa86-742961bc03ab",
+      "name": "Telegram2",
+      "webhookId": "36936ea1-2028-4abc-99ec-88129a69eedc",
+      "credentials": {
+        "telegramApi": {
+          "id": "l98Xt2GNadjwoHct",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Scheduled Report:\n\nThis triggers a report every 3 hours, sending the updated data.",
+        "height": 360,
+        "width": 1640
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        -1060
+      ],
+      "id": "f6884d8a-12ff-45d4-a754-994980da920a",
+      "name": "Sticky Note8"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Supabase2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "Supabase3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Supabase5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request3": {
+      "main": [
+        [
+          {
+            "node": "Telegram4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram3": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram1": {
+      "main": [
+        []
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase2": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain1": {
+      "main": [
+        [
+          {
+            "node": "Supabase1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase1": {
+      "main": [
+        [
+          {
+            "node": "Telegram1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase3": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase5": {
+      "main": [
+        [
+          {
+            "node": "Code3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code3": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Supabase4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase4": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Supabase6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase6": {
+      "main": [
+        [
+          {
+            "node": "Code4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code4": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain2": {
+      "main": [
+        [
+          {
+            "node": "Telegram2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "aab2405c-59a8-48ac-be7c-01ed76c942fc",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c0a369dd0fd5b8827da4f7ae5a4100f6f76f791d372dcfc9b28f365aaed767c8"
+  },
+  "id": "HmHEPusZDRVQjKI9",
+  "tags": []
+}
